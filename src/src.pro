@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network widgets
+QT       += core gui network widgets opengl openglwidgets
 CONFIG   += c++11
 TARGET = ../cutentr
 TEMPLATE = app
@@ -18,6 +18,8 @@ target.path = $$PREFIX/bin
 INSTALLS += target
 
 SOURCES += main.cpp\
+    glwidget.cpp \
+    glwindow.cpp \
         mainwindow.cpp \
         ntr.cpp \
         ntrutility.cpp \
@@ -25,6 +27,8 @@ SOURCES += main.cpp\
         streamwindow.cpp \
 
 HEADERS  += mainwindow.h \
+    glwidget.h \
+    glwindow.h \
         ntr.h \
         ntrutility.h \
         streamworker.h \

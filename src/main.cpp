@@ -19,8 +19,8 @@
 #include "mainwindow.h"
 #include "ntr.h"
 #include "ntrutility.h"
-#include "streamwindow.h"
 #include "streamworker.h"
+#include "glwindow.h"
 
 void messageHandler(QtMsgType t, const QMessageLogContext &c, const QString &m);
 
@@ -40,16 +40,14 @@ int main(int argc, char *argv[])
     qInstallMessageHandler(messageHandler);
 
     QApplication a(argc, argv);
-    a.setApplicationName("cutentr");
-    a.setApplicationDisplayName("cuteNTR");
-    a.setApplicationVersion("v0.3.1");
+    a.setApplicationName("ntrgl");
+    a.setApplicationDisplayName("ntrgl");
+    a.setApplicationVersion("v0.0.1");
 
     MainWindow w;
-    StreamWindow top(true);
-    StreamWindow bot(false);
-
-    top.setTitle("Top screen - cuteNTR");
-    bot.setTitle("Bottom screen - cuteNTR");
+    QSettings settings(a.applicationName());
+    GLWindow *glWindow = new GLWindow(&settings);
+    glWindow->setWindowTitle("screens");
 
     QThread *t_ntr = new QThread;
     Ntr ntr;
@@ -80,10 +78,6 @@ int main(int argc, char *argv[])
             &helper, SLOT(writeNfcPatch(int)));
     QObject::connect(&w, SIGNAL(stopStream()),
             &stream, SLOT(stopStream()), Qt::DirectConnection);
-    QObject::connect(&w, SIGNAL(topSettingsChanged()),
-            &top, SLOT(updateSettings()));
-    QObject::connect(&w, SIGNAL(botSettingsChanged()),
-            &bot, SLOT(updateSettings()));
 
     /* Connect Ntr signals */
     QObject::connect(&ntr, SIGNAL(streamReady()),
@@ -103,18 +97,17 @@ int main(int argc, char *argv[])
                     uint32_t,QByteArray)));
 
     /* Connect Stream signals */
-    QObject::connect(&stream, SIGNAL(topImageReady(QPixmap)),
-            &top, SLOT(renderPixmap(QPixmap)));
-    QObject::connect(&stream, SIGNAL(botImageReady(QPixmap)),
-            &bot, SLOT(renderPixmap(QPixmap)));
     QObject::connect(&stream, SIGNAL(stateChanged(StreamWorker::State)),
             &w, SLOT(handleStreamStateChanged(StreamWorker::State)));
-    QObject::connect(&stream, SIGNAL(stateChanged(StreamWorker::State)),
-            &top, SLOT(handleStreamStateChanged(StreamWorker::State)));
-    QObject::connect(&stream, SIGNAL(stateChanged(StreamWorker::State)),
-            &bot, SLOT(handleStreamStateChanged(StreamWorker::State)));
+
+    QObject::connect(&stream, SIGNAL(topImageReady(QPixmap)),
+                glWindow, SLOT(setTopPixmap(QPixmap)));
+    QObject::connect(&stream, SIGNAL(botImageReady(QPixmap)),
+                glWindow, SLOT(setBotPixmap(QPixmap)));
+
 
     w.show();
+    glWindow->show();
     t_ntr->start();
     t_stream->start();
     return a.exec();

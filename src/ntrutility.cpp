@@ -39,7 +39,7 @@ uint32_t NtrUtility::getPid(QString pname)
         return 0;
     }
     bool ok;
-    uint32_t pid = line.midRef(5,10).toUInt(&ok, 16);
+    uint32_t pid = line.mid(5,10).toUInt(&ok, 16);
     if (!ok) {
         qWarning() << "String conversion for pid failed";
         return 0;
